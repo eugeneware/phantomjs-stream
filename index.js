@@ -10,14 +10,15 @@ var PassThrough = require('stream').PassThrough;
 module.exports = Phantom;
 inherits(Phantom, Duplex);
 
-function Phantom(){
-  if (!(this instanceof Phantom)) return new Phantom();
+function Phantom(opts){
+  if (!(this instanceof Phantom)) return new Phantom(opts);
   Duplex.call(this);
 
   this.source = '';
   this.ps = null;
   this.buf = new PassThrough;
   this.killed = false;
+  this.path = opts && opts.path || 'phantomjs';
 
   this.on('finish', this._onfinish.bind(this));
 }
@@ -45,10 +46,11 @@ Phantom.prototype._onfinish = function(){
     if (self.killed) return;
     if (err) return dup.emit('error', err);
 
-    self.ps = spawn('phantomjs', [file]);
+    self.ps = spawn(self.path, [file]);
     self.ps.stdout.pipe(self.buf);
     self.ps.stderr.pipe(self.buf);
     self.ps.on('exit', self.emit.bind(self, 'exit'));
+    self.ps.on('error', self.emit.bind(self, 'error'));
   });
 };
 

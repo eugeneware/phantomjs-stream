@@ -1,6 +1,7 @@
 var phantom = require('./');
 var test = require('tape');
 var concat = require('concat-stream');
+var phantomjs = require('phantomjs-prebuilt-that-works');
 
 test('execute', function(t){
   var browser = phantom();
@@ -39,4 +40,28 @@ test('uncaught error', function(t){
 
   browser.write('setTimeout(phantom.exit);');
   browser.end('(function foo(){throw new Error(\'bar\')})()');
+});
+
+test('path', function(t){
+  t.plan(1);
+  var browser = phantom({ path: phantomjs.path });
+
+  browser.on('data', function(l){
+    browser.kill();
+    t.equal(l.toString(), '2\n');
+    t.end();
+  });
+
+  browser.end('console.log(1 + 1)');
+});
+
+test('bad path', function(t){
+  t.plan(2);
+  var browser = phantom({ path: './this/does/not/exist' });
+  browser.on('error', function (err) {
+    t.ok(err);
+    t.equal(err.code, 'ENOENT', 'file does not exist');
+    t.end();
+  });
+  browser.end('console.log(1 + 1)');
 });

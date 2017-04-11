@@ -26,9 +26,13 @@ $ npm install phantomjs-stream
 
 ## API
 
-### phantom()
+### phantom([options])
 
 Create a duplex stream around a newly spawned `phantomjs` which forwards written data to `phantomjs` and outputs the browser's console output.
+
+Options:
+
+  - `path`: By default `phantomjs-stream` will try to search for the binary `phantomjs` in it's current `PATH`. To override this, you can pass the full path to your own `phantomjs` binary through.
 
 ### phantom#kill()
 
